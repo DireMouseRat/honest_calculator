@@ -1,18 +1,32 @@
-class Calculator:
+class PassiveAggressiveCalculator:
     ask_for_equation = "Enter an equation\n"
     ask_store_result = "Do you want to store the result? (y / n):\n"
     ask_continue_calculations = "Do you want to continue calculations? (y / n):\n"
     input_is_alpha = "Do you even know what numbers are? Stay focused!"
     input_is_not_operator = "Yes ... an interesting math operation. You've slept through all classes, haven't you?"
     input_is_division_by_zero = "Yeah... division by zero. Smart move..."
+    msg_6 = " ... lazy"
+    msg_7 = " ... very lazy"
+    msg_8 = " ... very, very lazy"
+    msg_9 = "You are"
 
     def __init__(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.result = 0.0
-        self.memory = 0.0
+        self.x = 0
+        self.y = 0
+        self.result = 0
+        self.memory = 0
         self.operator = ''
         self.start_calculator()
+
+    def start_calculator(self):
+        continue_calculating = True
+        while continue_calculating:
+            self.get_valid_input()
+            self.calculate_operation()
+            self.shame_user(self.x, self.y, self.operator)
+            self.display_result()
+            self.store_or_discard()
+            continue_calculating = self.continue_calculations()
 
     def get_valid_input(self):
         invalid = True
@@ -25,10 +39,11 @@ class Calculator:
             elif middle not in ['+', '-', '*', '/']:
                 print(self.input_is_not_operator)
             elif middle == '/' and float(right) == 0:
+                self.shame_user(left, middle, right)
                 print(self.input_is_division_by_zero)
             else:
-                self.x = float(left)
-                self.y = float(right)
+                self.x = float(left) if '.' in left else int(left)
+                self.y = float(right) if '.' in right else int(right)
                 self.operator = str(middle)
                 invalid = False
 
@@ -38,7 +53,7 @@ class Calculator:
         elif self.operator == '-':
             self.result = self.x - self.y
         elif self.operator == '*':
-            self.result = self.x * self.y
+            self.result = float(self.x * self.y)
         elif self.operator == '/':
             self.result = self.x / self.y
 
@@ -55,15 +70,6 @@ class Calculator:
             elif user_response == 'n':
                 invalid = False
 
-    def start_calculator(self):
-        continue_calculating = True
-        while continue_calculating:
-            self.get_valid_input()
-            self.calculate_operation()
-            self.display_result()
-            self.store_or_discard()
-            continue_calculating = self.continue_calculations()
-
     def continue_calculations(self):
         while True:
             user_response = input(self.ask_continue_calculations)
@@ -72,5 +78,22 @@ class Calculator:
             elif user_response == 'n':
                 return False
 
+    def shame_user(self, x, y, o):
+        msg = ''
+        if self.is_one_digit(x) and self.is_one_digit(y):
+            msg += self.msg_6
+        if (x == 1 or y == 1) and o == '*':
+            msg += self.msg_7
+        if (x == 0 or y == 0) and (o == '*' or o == '+' or o == '-'):
+            msg += self.msg_8
+        if msg != '':
+            msg = self.msg_9 + msg
+            print(msg)
 
-Calculator()
+    def is_one_digit(self, v):
+        if -10 < v < 10 and '.' not in str(v):
+            return True
+        return False
+
+
+PassiveAggressiveCalculator()
