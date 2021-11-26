@@ -1,99 +1,72 @@
-class PassiveAggressiveCalculator:
-    ask_for_equation = "Enter an equation\n"
-    ask_store_result = "Do you want to store the result? (y / n):\n"
-    ask_continue_calculations = "Do you want to continue calculations? (y / n):\n"
-    input_is_alpha = "Do you even know what numbers are? Stay focused!"
-    input_is_not_operator = "Yes ... an interesting math operation. You've slept through all classes, haven't you?"
-    input_is_division_by_zero = "Yeah... division by zero. Smart move..."
-    msg_6 = " ... lazy"
-    msg_7 = " ... very lazy"
-    msg_8 = " ... very, very lazy"
-    msg_9 = "You are"
+MSG = ["Enter an equation",
+       "Do you even know what numbers are? Stay focused!",
+       "Yes ... an interesting math operation. You've slept through all classes, haven't you?",
+       "Yeah... division by zero. Smart move...",
+       "Do you want to store the result? (y / n):\n",
+       "Do you want to continue calculations? (y / n):\n",
+       " ... lazy",
+       " ... very lazy",
+       " ... very, very lazy",
+       "You are",
+       "Are you sure? It is only one digit! (y / n)",
+       "Don't be silly! It's just one number! Add to the memory? (y / n)",
+       "Last chance! Do you really want to embarrass yourself? (y / n)"]
 
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.result = 0
-        self.memory = 0
-        self.operator = ''
-        self.start_calculator()
 
-    def start_calculator(self):
-        continue_calculating = True
-        while continue_calculating:
-            self.get_valid_input()
-            self.calculate_operation()
-            self.shame_user(self.x, self.y, self.operator)
-            self.display_result()
-            self.store_or_discard()
-            continue_calculating = self.continue_calculations()
+def check(v1, v2, v3):
+    msg = ''
+    if is_one_digit(v1) and is_one_digit(v2):
+        msg += MSG[6]
+    if (v1 == 1 or v2 == 1) and v3 == '*':
+        msg += MSG[7]
+    if (v1 == 0 or v2 == 0) and v3 in ['*', '+', '-']:
+        msg += MSG[8]
+    if msg != '':
+        print(MSG[9] + msg)
 
-    def get_valid_input(self):
-        invalid = True
-        while invalid:
-            left, middle, right = input(self.ask_for_equation).split()
-            left = str(self.memory) if left == 'M' else left
-            right = str(self.memory) if right == 'M' else right
-            if left.isalpha() or right.isalpha():
-                print(self.input_is_alpha)
-            elif middle not in ['+', '-', '*', '/']:
-                print(self.input_is_not_operator)
-            elif middle == '/' and float(right) == 0:
-                self.shame_user(left, middle, right)
-                print(self.input_is_division_by_zero)
+
+def is_one_digit(v):
+    return -10 < v < 10 and int(v) == float(v)
+
+
+operations = {
+    "+": (lambda x, y: x + y),
+    "-": (lambda x, y: x - y),
+    "*": (lambda x, y: x * y),
+    "/": (lambda x, y: x / y),
+}
+
+memory = 0
+
+while True:
+    print(MSG[0])
+    x, oper, y = input().split()
+    try:
+        x = memory if x == "M" else float(x)
+        y = memory if y == "M" else float(y)
+        check(x, y, oper)
+        result = operations[oper](x, y)
+        print(result)
+        if input(MSG[4]) == "y":
+            if is_one_digit(result):
+                i = 10
+                while True:
+                    a = input(MSG[i])
+                    if a == "y":
+                        if i < 12:
+                            i += 1
+                        else:
+                            memory = result
+                            break
+                    elif a == 'n':
+                        break
             else:
-                self.x = float(left) if '.' in left else int(left)
-                self.y = float(right) if '.' in right else int(right)
-                self.operator = str(middle)
-                invalid = False
-
-    def calculate_operation(self):
-        if self.operator == '+':
-            self.result = self.x + self.y
-        elif self.operator == '-':
-            self.result = self.x - self.y
-        elif self.operator == '*':
-            self.result = float(self.x * self.y)
-        elif self.operator == '/':
-            self.result = self.x / self.y
-
-    def display_result(self):
-        print(self.result)
-
-    def store_or_discard(self):
-        invalid = True
-        while invalid:
-            user_response = input(self.ask_store_result)
-            if user_response == 'y':
-                self.memory = self.result
-                invalid = False
-            elif user_response == 'n':
-                invalid = False
-
-    def continue_calculations(self):
-        while True:
-            user_response = input(self.ask_continue_calculations)
-            if user_response == 'y':
-                return True
-            elif user_response == 'n':
-                return False
-
-    def shame_user(self, x, y, o):
-        msg = ''
-        if self.is_one_digit(x) and self.is_one_digit(y):
-            msg += self.msg_6
-        if (x == 1 or y == 1) and o == '*':
-            msg += self.msg_7
-        if (x == 0 or y == 0) and (o == '*' or o == '+' or o == '-'):
-            msg += self.msg_8
-        if msg != '':
-            msg = self.msg_9 + msg
-            print(msg)
-
-    def is_one_digit(self, v):
-        if -10 < v < 10 and '.' not in str(v):
-            return True
-        return False
-
-
-PassiveAggressiveCalculator()
+                memory = result
+        if input(MSG[5]) == "n":
+            break
+    except ValueError:
+        print(MSG[1])
+    except KeyError:
+        print(MSG[2])
+    except ZeroDivisionError:
+        print(MSG[3])
